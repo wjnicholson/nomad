@@ -705,6 +705,40 @@ func Test_jobImpliedConstraints_Mutate(t *testing.T) {
 			expectedOutputError:    nil,
 			name:                   "task group with empty provider",
 		},
+		{
+			inputJob: &structs.Job{
+				Name: "example",
+				TaskGroups: []*structs.TaskGroup{
+					{
+						Name: "group-with-bridge",
+						Networks: []*structs.NetworkResource{
+							{Mode: "bridge"},
+						},
+					},
+				},
+			},
+			expectedOutputJob: &structs.Job{
+				Name: "example",
+				TaskGroups: []*structs.TaskGroup{
+					{
+						Name: "group-with-bridge",
+						Networks: []*structs.NetworkResource{
+							{Mode: "bridge"},
+						},
+						Constraints: []*structs.Constraint{
+							cniBridgeConstraint,
+							cniFirewallConstraint,
+							cniHostLocalConstraint,
+							cniLoopbackConstraint,
+							cniPortMapConstraint,
+						},
+					},
+				},
+			},
+			expectedOutputWarnings: nil,
+			expectedOutputError:    nil,
+			name:                   "task group with bridge network",
+		},
 	}
 
 	for _, tc := range testCases {
